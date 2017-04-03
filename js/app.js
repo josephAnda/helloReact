@@ -13,10 +13,12 @@ var ContactItem = React.createClass({
     // the final lines when possible. The parentheses are not strictly
     // necessary.
 		return (
-			React.createElement('li', {},
-				React.createElement('h2', {}, this.props.name),
-				React.createElement('a', {href: 'mailto:'+ this.props.email}, this.props.email),
-				React.createElement('div', {}, this.props.description)
+
+	//  Note that like the DOM, React uses the className property to assign CSS classes (as class is a reserved word in JavaScript).
+			React.createElement('li', {className: 'ContactItem'},
+				React.createElement('h2', {className: 'ContactItem-name'}, this.props.name),
+				React.createElement('a', {className: 'ContactItem-email', href: 'mailto:'+ this.props.email}, this.props.email),
+				React.createElement('div', {className: 'ContactItem-description'}, this.props.description)
 			)
 		)
 	},
@@ -31,7 +33,7 @@ var ContactForm = React.createClass({
 	render: function() {
 
 		return (
-			React.createElement('form', {},
+			React.createElement('form', {className: 'ContactForm'},
 				React.createElement('input', {
 					type: 'text', 
 					placeholder: 'Name (required)',
