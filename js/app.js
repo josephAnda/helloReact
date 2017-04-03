@@ -56,6 +56,29 @@ var ContactForm = React.createClass({
 
 });
 
+var ContactView = React.createClass({
+	propTypes: {
+		contacts: React.PropTypes.array.isRequired,
+		newContact: React.PropTypes.object.isRequired
+	},
+
+	render: function() {
+
+		var contactItemElements = this.props.contacts.filter( function(contact) {
+			return contact.email }).map( function(contact) {
+				return React.createElement(ContactItem, contact);
+			})
+
+		return (
+			React.createElement('div', {className:"ContactView"},
+				React.createElement('h1', {className:"ContactView-heading"}, "Contacts"),
+				React.createElement('ul', {className:"ContactView-list"}, contactItemElements),
+				React.createElement(ContactForm, {contact: this.props.newContact})
+			)
+		)
+	}
+});
+
 var contacts = [
 	{
 		key: 1, 
@@ -79,25 +102,18 @@ var newContact = {
 	description: ""
 };
 
-var listElements = contacts.filter( function(contact) {
-	return contact.email }).map( function(contact) {
-		return React.createElement(ContactItem, contact);
-})
 
 //  Below is where the render magic happens.  Note that React.createElement needs to be passed an object or a 
 //  reference to an object that contains the required props in a key-value pair combination.  For example,
 //  creating an element of the class 'ContactForm' requires an object with a value for the contact attribute 
 //  to be passed to it. 
-var rootElement = 
-	React.createElement('div', {},
-		React.createElement('h1', {}, "Contacts"),
-		React.createElement('ul', {}, listElements),
-		React.createElement(ContactForm, {contact: newContact})
-	);
 
-
-	
-
-
-ReactDOM.render(rootElement, document.getElementById('react-app'));
+//  The implementation below has been modified to handle the task of adding classnames to the initial root element
+ReactDOM.render(
+	React.createElement(ContactView, {
+		contacts: contacts,
+		newContact: newContact
+	}), 
+	document.getElementById('react-app')
+);
 //ReactDOM.render(form, document.getElementById('react-app'));
