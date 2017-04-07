@@ -119,7 +119,7 @@ var ContactView = React.createClass({
 //  be communicated in this way to preserve the immutability of the components.  In short, the necessary changes are communicated through
 //  props
 
-//  [  ]  Determine how the value of the strings determining the input values are concatenated rather than used to overwrite 
+//  [  ]  Use a flow chart to map how the value of the strings determining the input values are concatenated rather than used to overwrite 
 
 var state = {};
 
@@ -135,6 +135,7 @@ var setState = function(changes) {
 	);
 		
 };
+
 
 var updateView = function(contact) {
 	setState({newContact: contact});
