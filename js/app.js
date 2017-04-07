@@ -29,18 +29,21 @@ var ContactForm = React.createClass({
 	propTypes: {
 		value: React.PropTypes.object.isRequired,
 		onChange: React.PropTypes.func.isRequired,
-		onClick: React.PropTypes.func.isRequired
+		onClick: React.PropTypes.func.isRequired //  onClick was added just to experiment 
 	},
 
 	render: function() {
 
-		var oldContact = this.props.value;
+		var oldContact = this.props.value;  //  Here we're trying to track the original contact passed into the form
 		var onChange = this.props.onChange;
 		var onClick = this.props.onClick;  //  This line references the newly defined onClick prop.  
 
 		//  Take note of the onChange function and how it references user input
 		return (
-			React.createElement('form', {className: 'ContactForm'},
+			React.createElement('form', {
+				className: 'ContactForm',
+				//onSubmit: this.props.updateView(newContact)  //  <--This line is sketchy.  We need to define an updateView or use an existing method to change the list 
+			},
 				React.createElement('input', {
 					type: 'text', 
 					placeholder: 'Name (required)',
@@ -66,7 +69,7 @@ var ContactForm = React.createClass({
 					}
 				}),
 				React.createElement('textarea', {
-					placeholder: 'Description',
+					placeholder: 'Description (optional)',
 					value: this.props.value.description,
 					onChange: function(e) {
 						onChange(Object.assign({}, oldContact, {description: e.target.value}));
@@ -86,7 +89,8 @@ var ContactForm = React.createClass({
 var ContactView = React.createClass({
 	propTypes: {
 		contacts: React.PropTypes.array.isRequired,
-		newContact: React.PropTypes.object.isRequired
+		newContact: React.PropTypes.object.isRequired,
+		onContactChange: React.PropTypes.func.isRequired
 	},
 
 	render: function() {
@@ -102,49 +106,77 @@ var ContactView = React.createClass({
 				React.createElement('ul', {className:"ContactView-list"}, contactItemElements),
 				React.createElement(ContactForm, {
 					value: this.props.newContact,
-					onChange: function(contact) { console.log(contact) },
-					onClick: function(message) {console.log(message)} //  The following is a test line to probe functionality
+					onChange: this.props.onContactChange,
+					onClick: function(message) { console.log(message) } //  The following is a test line to probe functionality
 				})
 			)
 		)
 	}
 });
 
-var contacts = [
-	{
-		key: 1, 
-		name: "James K Nelson", 
-		email: "james@jamesknelson.com",
-	},
-	{
-		key: 2,
-		name: "Jim",
-		email: "jim@example.com",
-	},
-	{
-		key: 3,
-		name: "Joe"
-	}
-];	
+//  Below is the path by which React communicates its state from lower-level components to higher level components.  Object.assign()
+//  Is heavily relied upon to return objects with modified properties that reflect changes to the interface.  These changes need to 
+//  be communicated in this way to preserve the immutability of the components.  In short, the necessary changes are communicated through
+//  props
 
-var newContact = {
-	name: "",
-	email: "",
-	description: ""
+//  [  ]  Determine how the value of the strings determining the input values are concatenated rather than used to overwrite 
+
+var state = {};
+
+var setState = function(changes) {
+	Object.assign(state, changes);  //  This line should assign properties specified in a 'changes' object to the 'state' object
+
+	ReactDOM.render(
+		React.createElement(ContactView, 
+			Object.assign( {}, state, {
+				onContactChange: updateView,
+			})),
+		document.getElementById('react-app')
+	);
+		
 };
 
+var updateView = function(contact) {
+	setState({newContact: contact});
+};
 
-//  Below is where the render magic happens.  Note that React.createElement needs to be passed an object or a 
-//  reference to an object that contains the required props in a key-value pair combination.  For example,
-//  creating an element of the class 'ContactForm' requires an object with a value for the contact attribute 
-//  to be passed to it. 
-
-//  The implementation below has been modified to handle the task of adding classnames to the initial root element
-ReactDOM.render(
-	React.createElement(ContactView, {
-		contacts: contacts,
-		newContact: newContact
-	}), 
-	document.getElementById('react-app')
-);
-//ReactDOM.render(form, document.getElementById('react-app'));
+// Set initial data
+setState({
+  contacts: [
+    {
+    	key: 1, 
+    	name: "James K Nelson", 
+    	email: "james@jamesknelson.com", 
+    	description: "Front-end Unicorn"
+    },
+    {
+    	key: 2, 
+    	name: "Jim", 
+    	email: "jim@example.com",
+    	description:  "Bogus example guy . . . "
+    },
+    {
+    	key: 3,
+    	name: "Joseph O Anda",
+    	email:  "orenmurasaki@gmail.com",
+    	description:  "Front-end Ninja"
+    },
+    {
+    	key: 4,
+    	name: "Cloud Strife",
+    	email: "cloud@avalanche.com",
+    	description: "mercenary"
+    },
+    {
+    	key: 5,
+    	name: "Lloyd Irving",
+    	email: "lloyd@tales.org",
+    	description: "sword enthusiast"
+    }
+  ],
+  newContact: {
+  		name: "", 
+  		email: "", 
+  		description: ""
+  	},
+});
