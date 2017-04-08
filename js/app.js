@@ -1,5 +1,7 @@
 
 //  [  ]  Use a flow chart to map how the value of the strings determining the input values are concatenated rather than used to overwrite 
+//  [  ]  Refactor so that ContactView is altering the contacts array, rather than the the contact form.  We want the contact form to 
+//  trigger some event that results in contact view altering itself . . . we want to pass the state upwards.  
 
 var ContactItem = React.createClass({
 	// Note that propTypes is a debugging tool and that the code functions without it
@@ -32,6 +34,7 @@ var ContactForm = React.createClass({
 		value: React.PropTypes.object.isRequired,
 		onChange: React.PropTypes.func.isRequired,
 		onClick: React.PropTypes.func.isRequired //  onClick was added just to experiment 
+		onSubmit: React.PropTypes.func.isRequired // experimental form submission feature
 	},
 
 	render: function() {
@@ -39,12 +42,13 @@ var ContactForm = React.createClass({
 		var oldContact = this.props.value;  //  Here we're trying to track the original contact passed into the form
 		var onChange = this.props.onChange;
 		var onClick = this.props.onClick;  //  This line references the newly defined onClick prop.  
+		
 
 		//  Take note of the onChange function and how it references user input
 		return (
 			React.createElement('form', {
 				className: 'ContactForm',
-				//onSubmit: this.props.updateView(newContact)  //  <--This line is sketchy.  We need to define an updateView or use an existing method to change the list 
+				onSubmit: this.props.onSubmit(oldContact, "contactsArray")  //  Referencing a function passed in during the form creation  
 			},
 				React.createElement('input', {
 					type: 'text', 
@@ -92,7 +96,8 @@ var ContactView = React.createClass({
 	propTypes: {
 		contacts: React.PropTypes.array.isRequired,
 		newContact: React.PropTypes.object.isRequired,
-		onContactChange: React.PropTypes.func.isRequired
+		onContactChange: React.PropTypes.func.isRequired,
+		onFormSubmit: React.PropTypes.func.isRequired
 	},
 
 	render: function() {
@@ -109,7 +114,8 @@ var ContactView = React.createClass({
 				React.createElement(ContactForm, {
 					value: this.props.newContact,
 					onChange: this.props.onContactChange,
-					onClick: function(message) { console.log(message) } //  The following is a test line to probe functionality
+					onClick: function(message) { console.log(message) },
+					onSubmit: this.props.onFormSubmit  //  The following is a test line to probe functionality
 				})
 			)
 		)
@@ -132,6 +138,7 @@ var setState = function(changes) {
 		React.createElement(ContactView, 
 			Object.assign( {}, state, {
 				onContactChange: updateView,
+				onFormSubmit: submitNewContact,
 			})),
 		document.getElementById('react-app')
 	);
@@ -142,6 +149,17 @@ var setState = function(changes) {
 var updateView = function(contact) {
 	setState({newContact: contact});
 };
+
+//  Adds new contact to model and resets the form field 
+var submitNewContact = function(contact, contactsArray) {
+	if (contact.name && contact.email) { 
+		contactsArray.push(contact); 
+		contact.email = "";
+		contact.description = "";
+	} else {
+		alert('Please make sure both name and email fields are filled out');
+	}
+}
 
 // Set initial data
 setState({
