@@ -48,7 +48,7 @@ var ContactForm = React.createClass({
 		return (
 			React.createElement('form', {
 				className: 'ContactForm',
-				onSubmit: this.props.onSubmit(oldContact, "contactsArray")  //  Referencing a function passed in during the form creation  
+				onSubmit: this.props.onSubmit(oldContact) //  Referencing a function passed in during the form creation  
 			},
 				React.createElement('input', {
 					type: 'text', 
@@ -151,11 +151,18 @@ var updateView = function(contact) {
 };
 
 //  Adds new contact to model and resets the form field 
-var submitNewContact = function(contact, contactsArray) {
+var submitNewContact = function(contact) {
 	if (contact.name && contact.email) { 
-		contactsArray.push(contact); 
-		contact.email = "";
-		contact.description = "";
+		var updatedContacts = state.contacts;
+		updatedContacts.push(contact);
+		setState({
+			contacts: updatedContacts,
+			newContact: {
+		  		name: "", 
+		  		email: "", 
+		  		description: "",
+		  	},
+		})
 	} else {
 		alert('Please make sure both name and email fields are filled out');
 	}
