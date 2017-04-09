@@ -1,7 +1,7 @@
 
 //  [  ]  Use a flow chart to map how the value of the strings determining the input values are concatenated rather than used to overwrite 
-//  [  ]  Refactor so that ContactView is altering the contacts array, rather than the the contact form.  We want the contact form to 
-//  trigger some event that results in contact view altering itself . . . we want to pass the state upwards.  
+//  [  ]  Learn how the flow of logic in the prior item relates to the general react philosophy of controlled components, and 
+//  how state is ultimately tracked within the framework 
 
 var ContactItem = React.createClass({
 	// Note that propTypes is a debugging tool and that the code functions without it
@@ -33,35 +33,31 @@ var ContactForm = React.createClass({
 	propTypes: {
 		value: React.PropTypes.object.isRequired,
 		onChange: React.PropTypes.func.isRequired,
-		onClick: React.PropTypes.func.isRequired //  onClick was added just to experiment 
-		onSubmit: React.PropTypes.func.isRequired // experimental form submission feature
+		onSubmit: React.PropTypes.func.isRequired, // experimental form submission feature
 	},
 
 	render: function() {
 
 		var oldContact = this.props.value;  //  Here we're trying to track the original contact passed into the form
 		var onChange = this.props.onChange;
-		var onClick = this.props.onClick;  //  This line references the newly defined onClick prop.  
-		
+		var onSubmit = this.props.onSubmit;
 
 		//  Take note of the onChange function and how it references user input
 		return (
 			React.createElement('form', {
 				className: 'ContactForm',
-				onSubmit: this.props.onSubmit(oldContact) //  Referencing a function passed in during the form creation  
+				onSubmit: function(e) { 
+					e.preventDefault();  //  This line keeps every onChange event from triggering a submit
+					onSubmit(oldContact); 
+				},
 			},
 				React.createElement('input', {
 					type: 'text', 
 					placeholder: 'Name (required)',
 					value: this.props.value.name,
 					onChange: function(e) {
-						onChange(Object.assign({}, oldContact, {name: e.target.value}));  //  Object.assign is actually returning a new object to be passed to 
-						//  onChange, which was defined as the onChange function above(and hence whatever function is passed to onChange when a ContactForm is created)
+						onChange(Object.assign({}, oldContact, {name: e.target.value})); 
 					}, 
-					onClick: function() {
-						onClick("Here's a test relay from the 'Name' field");
-
-					}
 				}),
 				React.createElement('input', {
 					type: 'text', 
@@ -70,9 +66,6 @@ var ContactForm = React.createClass({
 					onChange: function(e) {
 						onChange(Object.assign({}, oldContact, {email: e.target.value}));
 					},
-					onClick: function() {
-						onClick("Here's a test relay from the 'Email' field"); 
-					}
 				}),
 				React.createElement('textarea', {
 					placeholder: 'Description (optional)',
@@ -80,9 +73,6 @@ var ContactForm = React.createClass({
 					onChange: function(e) {
 						onChange(Object.assign({}, oldContact, {description: e.target.value}));
 					},
-					onClick: function() {
-						onClick("Here's a test relay from the 'Description' field");  
-					}
 				}),
 				React.createElement('button', {type: 'submit'}, "Add content" )
 			)
@@ -114,7 +104,6 @@ var ContactView = React.createClass({
 				React.createElement(ContactForm, {
 					value: this.props.newContact,
 					onChange: this.props.onContactChange,
-					onClick: function(message) { console.log(message) },
 					onSubmit: this.props.onFormSubmit  //  The following is a test line to probe functionality
 				})
 			)
@@ -153,6 +142,7 @@ var updateView = function(contact) {
 //  Adds new contact to model and resets the form field 
 var submitNewContact = function(contact) {
 	if (contact.name && contact.email) { 
+		contact.key = keyTracker++;
 		var updatedContacts = state.contacts;
 		updatedContacts.push(contact);
 		setState({
@@ -162,12 +152,13 @@ var submitNewContact = function(contact) {
 		  		email: "", 
 		  		description: "",
 		  	},
-		})
+		});
 	} else {
-		alert('Please make sure both name and email fields are filled out');
+		console.log('Please make sure both name and email fields are filled out');
 	}
-}
-
+};
+//  Keep track of unique key id
+var keyTracker = 0;
 // Set initial data
 setState({
   contacts: [
@@ -208,3 +199,6 @@ setState({
   		description: ""
   	},
 });
+
+keyTracker = ++state.contacts.length;
+
