@@ -1,7 +1,4 @@
 
-//  [  ]  Use a flow chart to map how the value of the strings determining the input values are concatenated rather than used to overwrite 
-//  [  ]  Learn how the flow of logic in the prior item relates to the general react philosophy of controlled components, and 
-//  how state is ultimately tracked within the framework 
 
 var ContactItem = React.createClass({
 	// Note that propTypes is a debugging tool and that the code functions without it
@@ -12,13 +9,10 @@ var ContactItem = React.createClass({
 	},
 
 	render: function() {
-	// Note from James:  I wrap mult-line return statements in parentheses to avoid the
-    // inevitable bugs caused by forgetting that JavaScript will throw away
-    // the final lines when possible. The parentheses are not strictly
-    // necessary.
+	// Return statement is wrapped in parentheses to ensure every statement is executed 
 		return (
 
-	//  Note that like the DOM, React uses the className property to assign CSS classes (as class is a reserved word in JavaScript).
+	//  Note that like the DOM, React uses the className property to assign CSS classes 
 			React.createElement('li', {className: 'ContactItem'},
 				React.createElement('h2', {className: 'ContactItem-name'}, this.props.name),
 				React.createElement('a', {className: 'ContactItem-email', href: 'mailto:'+ this.props.email}, this.props.email),
@@ -31,9 +25,9 @@ var ContactItem = React.createClass({
 var ContactForm = React.createClass({
 
 	propTypes: {
-		value: React.PropTypes.object.isRequired,
+		value: React.PropTypes.object.isRequired,  //  Associated with a ContactItem object
 		onChange: React.PropTypes.func.isRequired,
-		onSubmit: React.PropTypes.func.isRequired, // experimental form submission feature
+		onSubmit: React.PropTypes.func.isRequired, 
 	},
 
 	render: function() {
@@ -157,7 +151,7 @@ var submitNewContact = function(contact) {
 		console.log('Please make sure both name and email fields are filled out');
 	}
 };
-//  Keep track of unique key id
+//  Keep track of unique key id for contacts
 var keyTracker = 0;
 // Set initial data
 setState({
