@@ -1,4 +1,4 @@
-
+//  [  ]  Potential bug:  state.contacts, upon initialization, has a last undefined entry in the array
 
 var ContactItem = React.createClass({
 	// Note that propTypes is a debugging tool and that the code functions without it
@@ -110,8 +110,6 @@ var ContactView = React.createClass({
 //  be communicated in this way to preserve the immutability of the components.  In short, the necessary changes are communicated through
 //  props
 
-
-
 var state = {};
 
 var setState = function(changes) {
@@ -133,65 +131,74 @@ var updateView = function(contact) {
 	setState({newContact: contact});
 };
 
-//  Adds new contact to model and resets the form field 
+
 var submitNewContact = function(contact) {
 	if (contact.name && contact.email) { 
-		contact.key = keyTracker++;
+		var updatedContact = Object.assign( {}, contact, {
+			key: keyTracker++,
+			errors: {},
+		});  
+
+		if (!/.+@.+\..+/.test(contact.email)) {
+  			updatedContact.errors.email = ["Please enter your new contact's email"];
+		}
 		var updatedContacts = state.contacts;
-		updatedContacts.push(contact);
+		updatedContacts.push(updatedContact);
 		setState({
 			contacts: updatedContacts,
-			newContact: {
-		  		name: "", 
-		  		email: "", 
-		  		description: "",
-		  	},
+			newContact: CONTACT_TEMPLATE,
 		});
 	} else {
 		console.log('Please make sure both name and email fields are filled out');
 	}
 };
-//  Keep track of unique key id for contacts
+
 var keyTracker = 0;
-// Set initial data
+var CONTACT_TEMPLATE = {
+	name: "", 
+	email: "", 
+	description: "",
+	errors: null,
+};
 setState({
   contacts: [
     {
     	key: 1, 
     	name: "James K Nelson", 
     	email: "james@jamesknelson.com", 
-    	description: "Front-end Unicorn"
+    	description: "Front-end Unicorn",
+    	errors: null,
     },
     {
     	key: 2, 
     	name: "Jim", 
     	email: "jim@example.com",
-    	description:  "Bogus example guy . . . "
+    	description:  "Bogus example guy . . . ",
+    	errors: null,
     },
     {
     	key: 3,
     	name: "Joseph O Anda",
     	email:  "orenmurasaki@gmail.com",
-    	description:  "Front-end Ninja"
+    	description:  "Front-end Ninja",
+    	errors: null,
     },
     {
     	key: 4,
     	name: "Cloud Strife",
     	email: "cloud@avalanche.com",
-    	description: "mercenary"
+    	description: "mercenary",
+    	errors: null,
     },
     {
     	key: 5,
     	name: "Lloyd Irving",
     	email: "lloyd@tales.org",
-    	description: "sword enthusiast"
+    	description: "sword enthusiast",
+    	errors: null,
     }
   ],
-  newContact: {
-  		name: "", 
-  		email: "", 
-  		description: ""
-  	},
+  newContact: CONTACT_TEMPLATE,
 });
 
 keyTracker = ++state.contacts.length;
