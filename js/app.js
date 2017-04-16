@@ -1,4 +1,7 @@
 //  [  ]  Potential bug:  state.contacts, upon initialization, has a last undefined entry in the array
+//  [!!]  Add red border to input elements that are erroneous 
+//  [!!]  Remove border if problematic input is dealt with 
+//  [  ]  Refactor so that you add a className prop instead of alter the DOM
 
 var ContactItem = React.createClass({
 	// Note that propTypes is a debugging tool and that the code functions without it
@@ -42,7 +45,7 @@ var ContactForm = React.createClass({
 				className: 'ContactForm',
 				onSubmit: function(e) { 
 					e.preventDefault();  //  This line keeps every onChange event from triggering a submit
-					onSubmit(oldContact); 
+					onSubmit(oldContact, e.target.childNodes); 
 				},
 			},
 				React.createElement('input', {
@@ -52,6 +55,7 @@ var ContactForm = React.createClass({
 					onChange: function(e) {
 						onChange(Object.assign({}, oldContact, {name: e.target.value})); 
 					}, 
+					id: 'nameInput',
 				}),
 				React.createElement('input', {
 					type: 'text', 
@@ -60,6 +64,7 @@ var ContactForm = React.createClass({
 					onChange: function(e) {
 						onChange(Object.assign({}, oldContact, {email: e.target.value}));
 					},
+					id: 'emailInput',
 				}),
 				React.createElement('textarea', {
 					placeholder: 'Description (optional)',
@@ -126,31 +131,54 @@ var setState = function(changes) {
 		
 };
 
-
+//  Function that re-renders DOM using setState when changes are detected in the UI
 var updateView = function(contact) {
 	setState({newContact: contact});
 };
 
 
-var submitNewContact = function(contact) {
-	if (contact.name && contact.email) { 
-		var updatedContact = Object.assign( {}, contact, {
-			key: keyTracker++,
-			errors: {},
-		});  
+var submitNewContact = function(contact, inputs) {
+	
+	//  Access name and email inputs from page 
+	var textInputs = Array.from(inputs).filter( function(input) {
+				return (input.tagName == 'INPUT');
+			});
+	
+	//  Prepare new contact object to be passed to ReactDOM
+	var updatedContact = Object.assign( {}, contact, {
+		key: keyTracker++,
+		errors: {},
+	});  
 
-		if (!/.+@.+\..+/.test(contact.email)) {
-  			updatedContact.errors.email = ["Please enter your new contact's email"];
+	//  RegEx to check for an email formatting error
+	//  [  ]  Move the following check to the inside of the error checking subroutine that follows it
+	if (!/.+@.+\..+/.test(contact.email)) {
+			updatedContact.errors.email = ["Please enter your new contact's email"];
+			var emailInput = Array.from(inputs).filter( function(input) {
+			return input.id == 'emailInput';
+		})[0];
+	}
+
+	//  Error checking subroutine for the text inputs (they can't be blank)
+	var textInputs = textInputs.map( function(input) {
+		if (!input.value && input.className != 'error') { 
+			input.className += 'error' 
+		} else if (input.value) {
+			input.className = '';  // <-- This line breaks the page if the textInputs have any className values besides 'error'
 		}
+		return input;
+	});
+	
+	//  Update the contact list if the minimum inputs aren't blank 
+	if (contact.name && contact.email) { 
+		
 		var updatedContacts = state.contacts;
 		updatedContacts.push(updatedContact);
 		setState({
 			contacts: updatedContacts,
 			newContact: CONTACT_TEMPLATE,
 		});
-	} else {
-		console.log('Please make sure both name and email fields are filled out');
-	}
+	} 
 };
 
 var keyTracker = 0;
